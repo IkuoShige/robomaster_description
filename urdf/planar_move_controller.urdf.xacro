@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#xacro">
+
+  <!--
+  Planar Move Controller for RoboMaster S1 Mecanum Wheels
+
+  This controller provides omnidirectional motion control using the
+  Gazebo Planar Move plugin, enabling full mecanum wheel functionality
+  (forward/backward, lateral movement, and rotation).
+
+  Based on Linorobot2's omni_drive implementation.
+  -->
+
+  <xacro:macro name="planar_move_controller" params="tf_prefix=''">
+    <gazebo>
+      <plugin name="planar_move_controller" filename="libgazebo_ros_planar_move.so">
+
+        <!-- ROS Topic Remappings -->
+        <ros>
+          <remapping>odom:=odom</remapping>
+        </ros>
+
+        <!-- Control Topics -->
+        <command_topic>cmd_vel</command_topic>
+        <odometry_topic>odom</odometry_topic>
+
+        <!-- Frame IDs -->
+        <odometry_frame>odom</odometry_frame>
+        <robot_base_frame>${tf_prefix}base_link</robot_base_frame>
+
+        <!-- Publishing Settings -->
+        <odometry_rate>50.0</odometry_rate>  <!-- Hz -->
+        <publish_odom>true</publish_odom>
+        <publish_odom_tf>true</publish_odom_tf>  <!-- Publish odom->base_link transform -->
+
+        <!-- Covariance Settings (optional) -->
+        <!-- Lower values = more confident in measurements -->
+        <covariance_x>0.001</covariance_x>
+        <covariance_y>0.001</covariance_y>
+        <covariance_yaw>0.01</covariance_yaw>
+
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+</robot>

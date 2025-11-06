@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!--
+  RoboMaster S1 Robot Description for Gazebo Simulation
+
+  This URDF defines the complete RoboMaster S1 robot for Gazebo including:
+  - 4-wheel mecanum drive base with omnidirectional control
+  - 2-axis gimbal system
+  - Camera sensor
+  - Livox MID-360 LiDAR sensor
+  - Planar move controller for mecanum wheel control
+
+  Control Interface:
+    Input:  /cmd_vel (geometry_msgs/Twist) - velocity commands
+    Output: /odom (nav_msgs/Odometry) - odometry data
+-->
+<robot name="robomaster_s1" xmlns:xacro="http://playerstage.sourceforge.net/gazebo/xmlschema/#xacro">
+
+  <!-- TF Prefix Support -->
+  <xacro:arg name="name" default=""/>
+  <xacro:property name="_name" value="$(arg name)"/>
+  <xacro:if value="${_name != ''}">
+    <xacro:property name="tf_prefix" value="${_name}/"/>
+  </xacro:if>
+  <xacro:if value="${_name == ''}">
+    <xacro:property name="tf_prefix" value=""/>
+  </xacro:if>
+
+  <!-- Include original Robomaster S1 components -->
+  <xacro:include filename="$(find robomaster_description)/urdf/base.urdf.xacro"/>
+  <xacro:include filename="$(find robomaster_description)/urdf/gimbal.urdf.xacro"/>
+  <xacro:include filename="$(find robomaster_description)/urdf/camera.urdf.xacro"/>
+  <xacro:include filename="$(find robomaster_description)/urdf/intelligent_controller.urdf.xacro"/>
+  <xacro:include filename="$(find robomaster_description)/urdf/tof.urdf.xacro"/>
+
+  <!-- Include Gazebo configuration -->
+  <xacro:include filename="$(find robomaster_description)/urdf/robomaster_s1.gazebo.xacro"/>
+  <!-- Planar move plugin for mecanum wheel omnidirectional control -->
+  <xacro:include filename="$(find robomaster_description)/urdf/planar_move_controller.urdf.xacro"/>
+
+  <!-- Include Livox MID-360 -->
+  <xacro:include filename="$(find ros2_livox_simulation)/urdf/mid360.xacro"/>
+
+  <!-- Instantiate Robomaster S1 components -->
+  <xacro:base tf_prefix="${tf_prefix}"/>
+  <xacro:gimbal tf_prefix="${tf_prefix}"/>
+  <xacro:camera tf_prefix="${tf_prefix}" mount="gimbal"/>
+  <xacro:intelligent_controller tf_prefix="${tf_prefix}" mount="gimbal"/>
+
+  <xacro:add_tof index="0" tf_prefix="${tf_prefix}"/>
+  <xacro:add_tof index="1" tf_prefix="${tf_prefix}"/>
+  <xacro:add_tof index="2" tf_prefix="${tf_prefix}"/>
+  <xacro:add_tof index="3" tf_prefix="${tf_prefix}"/>
+
+  <!-- Add Livox MID-360: front 110mm (x=0.11), up 125mm (z=0.125), rotated 180deg -->
+  <xacro:mid360 name="${tf_prefix}livox" parent="${tf_prefix}base_link" topic="/livox/lidar">
+    <origin xyz="0.11 0 0.125" rpy="0 0 ${pi}"/>
+  </xacro:mid360>
+
+  <!-- Instantiate Gazebo materials -->
+  <xacro:robomaster_s1_gazebo tf_prefix="${tf_prefix}"/>
+
+  <!-- Instantiate Planar Move Controller for mecanum wheels -->
+  <xacro:planar_move_controller tf_prefix="${tf_prefix}"/>
+
+</robot>
